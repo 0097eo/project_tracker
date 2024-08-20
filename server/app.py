@@ -26,7 +26,7 @@ class Signup(Resource):
         # Generate a random verification code
         verification_code = secrets.token_hex(3)
 
-        new_user = User(username=username, email=email, password=password, verification_code=verification_code, is_verified=False)
+        new_user = Student(username=username, email=email, password=password, verification_code=verification_code, is_verified=False)
         db.session.add(new_user)
         db.session.commit()
 
