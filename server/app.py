@@ -218,7 +218,53 @@ class AdminProjectResource(Resource):
         db.session.commit()
 
         return {'message': 'Project deleted successfully'}, 200
+    
+class ProjectListResource(Resource):
+    @jwt_required()
+    def get(self):
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
 
+        # Paginate the projects query
+        pagination = Project.query.paginate(page=page, per_page=per_page, error_out=False)
+        projects = pagination.items
+
+        project_list = []
+        for project in projects:
+            owner = Student.query.get(project.owner_id)
+            owner_name = owner.username if owner else 'Unknown'  # Default to 'Unknown' if owner not found
+
+            members = [member.username for member in project.members]
+            # Ensure the owner is the first member
+            if owner_name in members:
+                members.remove(owner_name)
+            members = [owner_name] + members
+
+            project_data = {
+                "id": project.id,
+                "name": project.name,
+                "description": project.description,
+                "github_link": project.github_link,
+                "cohort": project.cohort.name,
+                "owner_id": project.owner_id,
+                "owner_name": owner_name,
+                "members": members,
+                "created_at": project.created_at.strftime('%Y-%m-%d'),
+                "updated_at": project.updated_at.strftime('%Y-%m-%d'),
+            }
+            project_list.append(project_data)
+
+        return {
+            "total_projects": pagination.total,
+            "total_pages": pagination.pages,
+            "current_page": pagination.page,
+            "per_page": pagination.per_page,
+            "projects": project_list
+        }, 200
+
+
+
+api.add_resource(ProjectListResource, '/projects/all')
 api.add_resource(AdminCohortResource, '/admin/cohorts')
 api.add_resource(AdminProjectResource, '/admin/projects', '/admin/projects/<project_id>')
 api.add_resource(ProjectResource, '/projects', '/projects/<project_id>')
