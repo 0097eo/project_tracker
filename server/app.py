@@ -49,8 +49,15 @@ class Login(Resource):
            'refresh_token': refresh_token
         }, 200
     
+class RefreshToken(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        identity = get_jwt_identity()
+        access_token = create_access_token(identity=identity, expires_delta=timedelta(days=10))
+        return {'access_token': access_token}
+    
 
-
+api.add_resource(RefreshToken, '/refresh')
 api.add_resource(Signup, '/signup')
 api.add_resource(Login, '/login')
 if __name__ == '__main__':
