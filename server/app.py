@@ -7,6 +7,26 @@ from sqlalchemy import or_
 from datetime import timedelta, datetime
 
 
+class Signup(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+
+        if not username or not email or not password:
+            return {'error': 'Missing username, email, or password'}, 400
+
+        if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
+            return {'error': 'Username or email already exists'}, 400
+
+        new_user = User(username=username, email=email, password=password) and Student(username=username, email=email, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return {'message': 'User created successfully'}, 201
+
+
 class Login(Resource):
     def post(self):
         data = request.get_json()
@@ -28,7 +48,10 @@ class Login(Resource):
             'access_token': access_token,
            'refresh_token': refresh_token
         }, 200
+    
 
+
+api.add_resource(Signup, '/signup')
 api.add_resource(Login, '/login')
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
