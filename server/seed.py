@@ -45,40 +45,41 @@ def seed_data():
     
     db.session.commit()
 
-    # Create students
+    # Create students and assign to cohorts
     print("Seeding students...")
     students = []
-    for _ in range(50):
-        student = Student(
-            username=fake.user_name(),
-            email=fake.email(),
-            password='password123',
-            cohort=random.choice(cohorts)
-        )
-        students.append(student)
-        db.session.add(student)
+    for cohort in cohorts:
+        for _ in range(10):  # 10 students per cohort
+            student = Student(
+                username=fake.user_name(),
+                email=fake.email(),
+                password='password123',
+                cohort=cohort
+            )
+            students.append(student)
+            db.session.add(student)
     
     db.session.commit()
 
-    # Create projects
+    # Create projects and assign to cohorts
     print("Seeding projects...")
-    for _ in range(20):
-        project_cohort = random.choice(cohorts)
-        project_owner = random.choice([s for s in students if s.cohort == project_cohort])
-        project = Project(
-            name=fake.catch_phrase(),
-            description=fake.paragraph(),
-            github_link=f"https://github.com/{fake.user_name()}/{fake.slug()}",
-            cohort=project_cohort,
-            owner_id=project_owner.id
-        )
-        
-        # Add random members to the project
-        member_count = random.randint(1, 4)
-        project_members = random.sample([s for s in students if s.cohort == project_cohort], member_count)
-        project.members.extend(project_members)
-        
-        db.session.add(project)
+    for cohort in cohorts:
+        for _ in range(4):  # 4 projects per cohort
+            project_owner = random.choice(cohort.students)
+            project = Project(
+                name=fake.catch_phrase(),
+                description=fake.paragraph(),
+                github_link=f"https://github.com/{fake.user_name()}/{fake.slug()}",
+                cohort=cohort,
+                owner_id=project_owner.id
+            )
+            
+            # Add random members to the project from the same cohort
+            member_count = random.randint(1, 4)
+            project_members = random.sample(cohort.students, member_count)
+            project.members.extend(project_members)
+            
+            db.session.add(project)
     
     db.session.commit()
 
