@@ -5,6 +5,9 @@ from flask_restful import Resource
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from sqlalchemy import or_
 from datetime import timedelta, datetime
+import secrets
+from email.mime.text import MIMEText
+import smtplib
 
 
 class Signup(Resource):
@@ -20,11 +23,64 @@ class Signup(Resource):
         if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
             return {'error': 'Username or email already exists'}, 400
 
-        new_user = User(username=username, email=email, password=password) and Student(username=username, email=email, password=password)
+        # Generate a random verification code
+        verification_code = secrets.token_hex(3)
+
+        new_user = User(username=username, email=email, password=password, verification_code=verification_code, is_verified=False)
         db.session.add(new_user)
         db.session.commit()
 
-        return {'message': 'User created successfully'}, 201
+        try:
+            send_verification_email(email, verification_code)
+            return {'message': 'Verification email sent. Please check your inbox.'}, 201
+        except Exception as e:
+            # Handle email sending error
+            db.session.delete(new_user)
+            db.session.commit()
+            return {'error': 'Failed to send verification email.'}, 500
+
+def send_verification_email(email, verification_code):
+    sender = 'emmanuelokello294@gmail.com'
+    recipient = email
+    subject = 'Verify your email'
+    body = f'Your verification code is: {verification_code}'
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = recipient
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+            smtp.starttls()
+            smtp.login('emmanuelokello294@gmail.com', 'quzo ygrw gcse maim')
+            smtp.send_message(msg)
+    except smtplib.SMTPException as e:
+        print(f"Error sending verification email: {e}")
+        raise e
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        raise e
+    
+class VerifyEmail(Resource):
+    def post(self):
+        data = request.get_json()
+        email = data.get('email')
+        verification_code = data.get('verification_code')
+
+        if not email or not verification_code:
+            return {'error': 'Missing email or verification code'}, 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user or user.verification_code != verification_code:
+            return {'error': 'Invalid email or verification code'}, 401
+
+        user.is_verified = True
+        user.verification_code = None
+        db.session.commit()
+
+        return {'message': 'Email verified successfully'}, 200
 
 
 class Login(Resource):
@@ -271,6 +327,7 @@ api.add_resource(ProjectResource, '/projects', '/projects/<project_id>')
 api.add_resource(CohortResource, '/cohorts')
 api.add_resource(RefreshToken, '/refresh')
 api.add_resource(Signup, '/signup')
+api.add_resource(VerifyEmail, '/verify-email')
 api.add_resource(Login, '/login')
 if __name__ == '__main__':
     app.run(port=5555, debug=True)

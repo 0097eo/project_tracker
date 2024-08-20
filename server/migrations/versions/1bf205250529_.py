@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 6b86f394d455
+Revision ID: 1bf205250529
 Revises: 
-Create Date: 2024-08-20 09:34:41.595039
+Create Date: 2024-08-20 20:10:46.702972
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6b86f394d455'
+revision = '1bf205250529'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,6 +24,8 @@ def upgrade():
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('_password', sa.String(length=255), nullable=False),
     sa.Column('is_admin', sa.Boolean(), nullable=True),
+    sa.Column('is_verified', sa.Boolean(), nullable=True),
+    sa.Column('verification_code', sa.String(length=6), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
@@ -59,7 +61,9 @@ def upgrade():
     sa.Column('github_link', sa.String(length=255), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('cohort_id', sa.Integer(), nullable=False),
     sa.Column('owner_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['cohort_id'], ['cohorts.id'], name=op.f('fk_projects_cohort_id_cohorts')),
     sa.ForeignKeyConstraint(['owner_id'], ['students.id'], name=op.f('fk_projects_owner_id_students')),
     sa.PrimaryKeyConstraint('id')
     )
