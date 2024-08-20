@@ -139,8 +139,88 @@ class ProjectResource(Resource):
         db.session.commit()
 
         return {'message': 'Members added successfully'}, 200
+    
 
+class AdminCohortResource(Resource):
+    @jwt_required()
+    def post(self):
+        user = Admin.query.get(get_jwt_identity())
 
+        if not user or not user.is_admin:
+            return {'error': 'Only admins can add cohorts.'}, 403
+
+        data = request.get_json()
+        name = data.get('name')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        course_type = data.get('course_type')
+
+        if not name or not start_date or not end_date or not course_type:
+            return {'error': 'Missing cohort name, start date, end date, or course type'}, 400
+
+        new_cohort = Cohort(
+            name=name,
+            start_date=datetime.strptime(start_date, '%Y-%m-%d').date(),
+            end_date=datetime.strptime(end_date, '%Y-%m-%d').date(),
+            course_type=course_type,
+            admin_id=user.id
+        )
+
+        db.session.add(new_cohort)
+        db.session.commit()
+
+        return {'message': 'Cohort added successfully'}, 201
+
+class AdminProjectResource(Resource):
+    @jwt_required()
+    def post(self):
+        user = Admin.query.get(get_jwt_identity())
+
+        if not user or not user.is_admin:
+            return {'error': 'Only admins can add projects.'}, 403
+
+        data = request.get_json()
+        name = data.get('name')
+        description = data.get('description')
+        github_link = data.get('github_link')
+        cohort_id = data.get('cohort_id')
+        owner_id = data.get('owner_id')
+
+        if not name or not description or not github_link or not cohort_id or not owner_id:
+            return {'error': 'Missing project name, description, GitHub link, cohort ID, or owner ID'}, 400
+
+        new_project = Project(
+            name=name,
+            description=description,
+            github_link=github_link,
+            cohort_id=cohort_id,
+            owner_id=owner_id
+        )
+
+        db.session.add(new_project)
+        db.session.commit()
+
+        return {'message': 'Project added successfully'}, 201
+
+    @jwt_required()
+    def delete(self, project_id):
+        user = Admin.query.get(get_jwt_identity())
+
+        if not user or not user.is_admin:
+            return {'error': 'Only admins can delete projects.'}, 403
+
+        project = Project.query.get(project_id)
+
+        if not project:
+            return {'error': 'Project not found'}, 404
+
+        db.session.delete(project)
+        db.session.commit()
+
+        return {'message': 'Project deleted successfully'}, 200
+
+api.add_resource(AdminCohortResource, '/admin/cohorts')
+api.add_resource(AdminProjectResource, '/admin/projects', '/admin/projects/<project_id>')
 api.add_resource(ProjectResource, '/projects', '/projects/<project_id>')
 api.add_resource(CohortResource, '/cohorts')
 api.add_resource(RefreshToken, '/refresh')
