@@ -28,3 +28,5 @@ migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 api = Api(app)
 jwt = JWTManager(app)
+
+from models import *
