@@ -56,7 +56,35 @@ class RefreshToken(Resource):
         access_token = create_access_token(identity=identity, expires_delta=timedelta(days=10))
         return {'access_token': access_token}
     
+class CohortResource(Resource):
+    @jwt_required()
+    def get(self):
+        course_type = request.args.get('course_type')
+        
+        if course_type:
+            cohorts = Cohort.query.filter_by(course_type=course_type).all()
+        else:
+            cohorts = Cohort.query.all()
 
+        cohort_list = []
+        for cohort in cohorts:
+            cohort_data = {
+                "id": cohort.id,
+                "name": cohort.name,
+                "start_date": cohort.start_date.strftime('%Y-%m-%d'),
+                "end_date": cohort.end_date.strftime('%Y-%m-%d'),
+                "course_type": cohort.course_type,
+                "admin": cohort.admin.username,
+                "students": [student.username for student in cohort.students],
+                "projects": [project.name for project in cohort.projects],
+            }
+            cohort_list.append(cohort_data)
+
+        return {"cohorts": cohort_list}, 200
+
+
+    
+api.add_resource(CohortResource, '/cohorts')
 api.add_resource(RefreshToken, '/refresh')
 api.add_resource(Signup, '/signup')
 api.add_resource(Login, '/login')
