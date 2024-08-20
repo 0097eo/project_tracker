@@ -20,7 +20,7 @@ class User(db.Model):
         self._password = bcrypt.generate_password_hash(plaintext_password).decode('utf-8')
 
     def check_password(self, plaintext_password):
-        return bcrypt.check_password_hash(self._password, plaintext_password)
+        return bcrypt.check_password_hash(self._password, plaintext_password.encode('utf-8'))
 
 class Admin(User):
     __tablename__ = 'admins'
