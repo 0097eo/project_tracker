@@ -82,8 +82,66 @@ class CohortResource(Resource):
 
         return {"cohorts": cohort_list}, 200
 
+class ProjectResource(Resource):
+    @jwt_required()
+    def post(self):
+        user = Student.query.get(get_jwt_identity())
 
-    
+        if user.is_admin == 1:
+            return {'error': 'Only students can create projects.'}, 403
+
+        data = request.get_json()
+        name = data.get('name')
+        description = data.get('description')
+        github_link = data.get('github_link')
+
+        if not name or not description or not github_link:
+            return {'error': 'Missing project name, description, or GitHub link'}, 400
+
+        new_project = Project(
+            name=name,
+            description=description,
+            github_link=github_link,
+            cohort_id=user.cohort_id,  # Accessing cohort_id from the Student
+            owner_id=user.id
+        )
+
+        new_project.members.append(user)  # Add the creator as the first member
+
+        db.session.add(new_project)
+        db.session.commit()
+
+        return {'message': 'Project created successfully'}, 201
+
+    @jwt_required()
+    def put(self, project_id):
+        user = User.query.get(get_jwt_identity())
+
+        project = Project.query.get(project_id)
+
+        if not project:
+            return {'error': 'Project not found'}, 404
+
+        if project.owner_id != user.id:
+            return {'error': 'Only the project owner can add members'}, 403
+
+        data = request.get_json()
+        member_ids = data.get('member_ids')
+
+        if not member_ids:
+            return {'error': 'No member IDs provided'}, 400
+
+        for member_id in member_ids:
+            member = Student.query.get(member_id)
+            if member and member not in project.members:
+                project.members.append(member)
+
+        db.session.commit()
+
+        return {'message': 'Members added successfully'}, 200
+
+
+api.add_resource(ProjectResource, '/projects', '/projects/<project_id>')
 api.add_resource(CohortResource, '/cohorts')
 api.add_resource(RefreshToken, '/refresh')
 api.add_resource(Signup, '/signup')
