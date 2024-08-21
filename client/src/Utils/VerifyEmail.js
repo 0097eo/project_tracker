@@ -6,21 +6,21 @@ const VerifyEmail = () => {
   const [formData, setFormData] = useState({
     email: '',
     verification_code: '',
-  });
-  const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  })
+  const [message, setMessage] = useState('')
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const response = await axios.post('http://localhost:5555/verify-email', formData);
-      setMessage(response.data.message);
-      setFormData({ email: '', verification_code: '' });
-      navigate('/login');
+      const response = await axios.post('/verify-email', formData)
+      setMessage(response.data.message)
+      setFormData({ email: '', verification_code: '' })
+      navigate('/login')
 
     } catch (error) {
       setMessage(error.response?.data?.error || 'An error occurred during email verification');
