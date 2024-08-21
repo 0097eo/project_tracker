@@ -178,17 +178,15 @@ class ProjectResource(Resource):
         if not project:
             return {'error': 'Project not found'}, 404
 
-        if project.owner_id != user.id:
-            return {'error': 'Only the project owner can add members'}, 403
 
         data = request.get_json()
-        member_ids = data.get('member_ids')
+        member_usernames = data.get('member_usernames')
 
-        if not member_ids:
-            return {'error': 'No member IDs provided'}, 400
+        if not member_usernames:
+            return {'error': 'No member usernames provided'}, 400
 
-        for member_id in member_ids:
-            member = Student.query.get(member_id)
+        for username in member_usernames:
+            member = Student.query.filter_by(username=username).first()
             if member and member not in project.members:
                 project.members.append(member)
 
@@ -355,8 +353,22 @@ class UserResource(Resource):
                 user_data['projects'] = []
 
         return user_data, 200
+    
+class StudentsResource(Resource):
+    @jwt_required()
+    def get(self):
+        students = Student.query.all()
+        return {
+            'students': [
+                {
+                    'id': student.id,
+                    'username': student.username,
+                    'email': student.email
+                } for student in students
+            ]
+        }, 200
 
-
+api.add_resource(StudentsResource, '/students')
 api.add_resource(UserResource, '/user')
 api.add_resource(ProjectListResource, '/projects/all')
 api.add_resource(AdminCohortResource, '/admin/cohorts')
