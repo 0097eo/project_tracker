@@ -317,9 +317,47 @@ class ProjectListResource(Resource):
             "per_page": pagination.per_page,
             "projects": project_list
         }, 200
+    
+class UserResource(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+
+        if not user:
+            return {'error': 'User not found'}, 404
+
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'is_admin': user.is_admin,
+            'is_verified': user.is_verified,
+            'created_at': user.created_at.isoformat(),
+            'updated_at': user.updated_at.isoformat()
+        }
+
+        if user.is_admin:
+            admin = Admin.query.get(user.id)
+            if admin:
+                # Fetch cohorts managed by this admin
+                cohorts = Cohort.query.filter_by(admin_id=admin.id).all()
+                user_data['cohorts'] = [{'id': cohort.id, 'name': cohort.name} for cohort in cohorts]
+            else:
+                user_data['cohorts'] = []
+        else:
+            student = Student.query.get(user.id)
+            if student:
+                user_data['cohort'] = {'id': student.cohort.id, 'name': student.cohort.name} if student.cohort else None
+                user_data['projects'] = [{'id': project.id, 'name': project.name} for project in student.projects]
+            else:
+                user_data['cohort'] = None
+                user_data['projects'] = []
+
+        return user_data, 200
 
 
-
+api.add_resource(UserResource, '/user')
 api.add_resource(ProjectListResource, '/projects/all')
 api.add_resource(AdminCohortResource, '/admin/cohorts')
 api.add_resource(AdminProjectResource, '/admin/projects', '/admin/projects/<project_id>')
