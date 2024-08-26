@@ -131,9 +131,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="admin-dashboard">
-      <h1>Admin Dashboard</h1>
-      <div className="dashboard-content">
+    <div className="student-dashboard">
         <div className="sidebar">
           <button onClick={() => setActiveTab('cohorts')}>Cohorts</button>
           <button onClick={() => setActiveTab('students')}>Students</button>
@@ -141,7 +139,7 @@ const AdminDashboard = () => {
           <button onClick={() => setActiveTab('addCohort')}>Add Cohort</button>
           <button onClick={() => setActiveTab('addProject')}>Add Project</button>
         </div>
-        <div className="main-content">
+        <div className="content">
           {activeTab === 'cohorts' && (
             <section>
               <h2>Cohorts</h2>
@@ -273,7 +271,6 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 

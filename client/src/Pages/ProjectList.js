@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import '../App.css';
+import { IoArrowBack, IoArrowForward} from 'react-icons/io5';
+
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
@@ -53,60 +56,36 @@ const ProjectList = () => {
 
   return (
     <div>
-      <h1>Projects</h1>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+  
+      <div className="project-grid">
         {projects.map((project) => (
           <div
             key={project.id}
             onClick={() => handleCardClick(project)}
-            style={{
-              border: '1px solid #ccc',
-              borderRadius: '5px',
-              padding: '10px',
-              width: '200px',
-              cursor: 'pointer',
-            }}
+            className="project-card"
           >
             <h3>{project.name}</h3>
-            <p>{project.description.substring(0, 50)}...</p>
+            <p>{project.description.substring(0, 100)}...</p>
+            <p>{project.cohort}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={handlePreviousPage} disabled={currentPage === 1}>
-          Previous
+      <div className="pagination">
+        <button onClick={handlePreviousPage} disabled={currentPage === 1} className='pagination-btn'>
+        <IoArrowBack size={24} />
         </button>
-        <span style={{ margin: '0 10px' }}>
+        <span>
           Page {currentPage} of {totalPages}
         </span>
-        <button onClick={handleNextPage} disabled={currentPage === totalPages}>
-          Next
+        <button onClick={handleNextPage} disabled={currentPage === totalPages} className='pagination-btn'>
+        <IoArrowForward size={24} />
         </button>
       </div>
 
       {selectedProject && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '5px',
-              maxWidth: '500px',
-            }}
-          >
+        <div className="modal">
+          <div className="modal-content">
             <h2>{selectedProject.name}</h2>
             <p>
               <strong>Description:</strong> {selectedProject.description}

@@ -1,10 +1,9 @@
 import React from 'react';
+import '../App.css'
 
 const Home = () => {
   return (
     <div className="about-container">
-      <h1>About Project Tracker</h1>
-      
       <section>
         <h2>Our Mission</h2>
         <p>

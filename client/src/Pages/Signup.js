@@ -27,10 +27,10 @@ const Signup = () => {
         setFormData({username: '', email: '', password: ''})
     }
   return (
-    <div className="signup-container">
+    <div className="login-container">
       <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form className='login-form' onSubmit={handleSubmit}>
+        <div className='form-group'>
           <label htmlFor="username">Username:</label>
           <input
             type="text"
@@ -41,7 +41,7 @@ const Signup = () => {
             required
           />
         </div>
-        <div>
+        <div className='form-group'>
           <label htmlFor="email">Email:</label>
           <input
             type="email"
@@ -63,7 +63,7 @@ const Signup = () => {
             required
           />
         </div>
-        <button type="submit">Sign Up</button>
+        <button type="submit" className='login-btn'>Sign Up</button>
       </form>
       {message && <p className="message">{message}</p>}
     </div>

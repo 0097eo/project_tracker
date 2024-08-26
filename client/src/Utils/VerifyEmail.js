@@ -28,10 +28,10 @@ const VerifyEmail = () => {
   };
 
   return (
-    <div className="verify-email-container">
+    <div className="login-container">
       <h2>Verify Your Email</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form className='login-form' onSubmit={handleSubmit}>
+        <div className='form-group'>
           <label htmlFor="email">Email:</label>
           <input
             type="email"
@@ -42,7 +42,7 @@ const VerifyEmail = () => {
             required
           />
         </div>
-        <div>
+        <div className='form-group'>
           <label htmlFor="verification_code">Verification Code:</label>
           <input
             type="text"
@@ -53,7 +53,7 @@ const VerifyEmail = () => {
             required
           />
         </div>
-        <button type="submit">Verify Email</button>
+        <button type="submit" className='login-btn'>Verify Email</button>
       </form>
       {message && <p className="message">{message}</p>}
     </div>

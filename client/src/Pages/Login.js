@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Utils/AuthContext';
+import '../App.css'
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -27,8 +28,8 @@ const Login = () => {
   return (
     <div className="login-container">
       <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form className="login-form" onSubmit={handleSubmit}>
+        <div className="form-group">
           <label htmlFor="username">Username or Email:</label>
           <input
             type="text"
@@ -38,7 +39,7 @@ const Login = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="password">Password:</label>
           <input
             type="password"
@@ -48,7 +49,7 @@ const Login = () => {
             required
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" className='login-btn'>Login</button>
       </form>
       {error && <p className="error">{error}</p>}
     </div>

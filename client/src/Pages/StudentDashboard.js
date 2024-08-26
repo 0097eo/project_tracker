@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../Utils/AuthContext';
+import '../App.css'
 
 
 const ProjectCard = ({ project, onClick }) => (
@@ -27,8 +28,7 @@ const StudentDashboard = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [newMember, setNewMember] = useState('');
   const [students, setStudents] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+
   const { user } = useAuth();
   const [selectedProjectDetails, setSelectedProjectDetails] = useState(null);
 
@@ -61,8 +61,6 @@ const StudentDashboard = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       setProjects(response.data.projects);
-      setCurrentPage(response.data.current_page);
-      setTotalPages(response.data.total_pages);
     } catch (error) {
       console.error('Error fetching projects:', error);
     }
@@ -102,7 +100,7 @@ const StudentDashboard = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       setNewMember('');
-      fetchProjects(currentPage);
+      fetchProjects();
     } catch (error) {
       console.error('Error adding member:', error);
     }
@@ -112,29 +110,18 @@ const StudentDashboard = () => {
 
   return (
     <div className="student-dashboard">
-      <h1>Welcome, {user?.username}!</h1>
       <div className="sidebar">
-        <button onClick={() => setActiveTab('allProjects')}>All Projects</button>
         <button onClick={() => setActiveTab('myProjects')}>My Projects</button>
         <button onClick={() => setActiveTab('addProject')}>Add Project</button>
         <button onClick={() => setActiveTab('addMember')}>Add Group Member</button>
       </div>
       <div className="content">
+      <h1>Welcome, {user?.username}!</h1>
         {selectedProjectDetails ? (
           <ProjectDetails project={selectedProjectDetails} onClose={closeProjectDetails} />
         ) : (
           <>
-            {activeTab === 'allProjects' && (
-              <div>
-                <h2>All Projects</h2>
-                {renderProjects(projects)}
-                <div>
-                  <button onClick={() => fetchProjects(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
-                  <span>Page {currentPage} of {totalPages}</span>
-                  <button onClick={() => fetchProjects(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
-                </div>
-              </div>
-            )}
+            
             {activeTab === 'myProjects' && (
               <div>
                 <h2>My Projects</h2>
