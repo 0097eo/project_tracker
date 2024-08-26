@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../Utils/AuthContext';
 
+
 const ProjectCard = ({ project, onClick }) => (
   <div className="project-card" onClick={() => onClick(project)}>
     <h3>{project.name}</h3>
@@ -56,7 +57,7 @@ const StudentDashboard = () => {
 
   const fetchProjects = async (page) => {
     try {
-      const response = await axios.get(`http://localhost:5555/projects/all?page=${page}`, {
+      const response = await axios.get(`/projects/all?page=${page}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       setProjects(response.data.projects);
@@ -69,7 +70,7 @@ const StudentDashboard = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get('http://localhost:5555/students', {
+      const response = await axios.get('/students', {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       setStudents(response.data.students);
@@ -81,7 +82,7 @@ const StudentDashboard = () => {
   const handleCreateProject = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5555/projects', newProject, {
+      await axios.post('/projects', newProject, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       setNewProject({ name: '', description: '', github_link: '' });
@@ -95,7 +96,7 @@ const StudentDashboard = () => {
     e.preventDefault();
     if (!selectedProject || !newMember) return;
     try {
-      await axios.put(`http://localhost:5555/projects/${selectedProject.id}`, {
+      await axios.put(`/projects/${selectedProject.id}`, {
         member_usernames: [newMember]
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
