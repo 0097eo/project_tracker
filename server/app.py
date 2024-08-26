@@ -367,7 +367,37 @@ class StudentsResource(Resource):
                 } for student in students
             ]
         }, 200
+    
 
+class AdminStudentResource(Resource):
+    @jwt_required()
+    def post(self):
+        user = Admin.query.get(get_jwt_identity())
+
+        if not user or not user.is_admin:
+            return {'error': 'Only admins can add students to cohorts.'}, 403
+
+        data = request.get_json()
+        student_id = data.get('student_id')
+        cohort_id = data.get('cohort_id')
+
+        if not student_id or not cohort_id:
+            return {'error': 'Missing student ID or cohort ID'}, 400
+
+        student = Student.query.get(student_id)
+        cohort = Cohort.query.get(cohort_id)
+
+        if not student:
+            return {'error': 'Student not found'}, 404
+        if not cohort:
+            return {'error': 'Cohort not found'}, 404
+
+        student.cohort_id = cohort_id
+        db.session.commit()
+
+        return {'message': 'Student added to cohort successfully'}, 200
+
+api.add_resource(AdminStudentResource, '/admin/add-student-to-cohort')
 api.add_resource(StudentsResource, '/students')
 api.add_resource(UserResource, '/user')
 api.add_resource(ProjectListResource, '/projects/all')
