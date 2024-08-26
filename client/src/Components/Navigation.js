@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Utils/AuthContext';
+import '../App.css'
 
 const Navigation = () => {
   const { user, logout } = useAuth();
@@ -14,22 +15,24 @@ const Navigation = () => {
   return (
     <nav>
       <ul>
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/projects">Projects</Link></li>
+        <li><NavLink to="/" activeClassName="active">Home</NavLink></li>
         {!user && (
           <>
-            <li><Link to="/login">Login</Link></li>
-            <li><Link to="/signup">Signup</Link></li>
+            <li className="auth-link"><NavLink to="/login" activeClassName="active">Login</NavLink></li>
+            <li className="auth-link"><NavLink to="/signup" activeClassName="active">Signup</NavLink></li>
           </>
         )}
         {user && user.is_admin && (
-          <li><Link to="/admin-dashboard">Admin Dashboard</Link></li>
+          <li><NavLink to="/admin-dashboard" activeClassName="active">Admin Dashboard</NavLink></li>
         )}
         {user && !user.is_admin && (
-          <li><Link to="/student-dashboard">Student Dashboard</Link></li>
+          <li><NavLink to="/student-dashboard" activeClassName="active">Student Dashboard</NavLink></li>
         )}
         {user && (
-          <li><button onClick={handleLogout}>Logout</button></li>
+          <>
+            <li><NavLink to="/projects" activeClassName="active">Projects</NavLink></li>
+            <li className="auth-link"><button className="logout-button" onClick={handleLogout}>Logout</button></li>
+          </>
         )}
       </ul>
     </nav>
